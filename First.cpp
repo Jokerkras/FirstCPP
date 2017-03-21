@@ -15,45 +15,51 @@ C) список (std::list)
 #include <time.h>
 #include <vector>
 
-
-int kAndNeg(int k, int& Neg, std::list<int> List)
+double Findneg(std::list<double> list)
 {
-	if (List.empty())
+	if (list.empty())
 	{
 		throw "Список пуст";
 	}
 	else
 	{
+		std::list<double>::iterator it = list.begin();
 		int neg = 1;
-		int kNum;
-		int i = 1;
-		if (k <= List.size())
+		while ((neg == 1) && (it != list.end()))
 		{
-			std::list<int>::iterator it = List.begin();
-			while (i != k)
-			{
-				i++;
-				if ((neg == 1) && (*it < 0)) { neg = *it; }
+			if (*it < 0) { neg = *it; }
+			it++;
+		}
+		if (neg == 1) { throw "Нет отрицательных чисел"; }
+		return neg;
+	}
+}
+
+double FindK(std::list<double> list,int k)
+{
+	if (list.empty())
+	{
+		throw "Список пуст";
+	}
+	else
+	{
+		int knum;
+		if (k <= (list.size()-1))
+		{
+			std::list<double>::iterator it = list.begin();
+			for(int i = 0; i < k; i++) 
 				it++;
-			}
-			kNum = *it;
-			while ((neg == 1) && (it != List.end()))
-			{
-				if (*it < 0) { neg = *it; }
-				it++;
-			}
-			if (neg == 1) { throw "Нет отрицательных чисел"; }
-			return kNum;
+			return *it;
 		}
 		else { throw "В списке меньше, чем k элементов"; }
 	}
 }
 
-std::fstream CreateFileСycle(std::string fileName, int N, int M)
+std::fstream CreateFileСycle(std::string fileName, int n, int M)
 {	
 	srand(time(NULL));
 	std::fstream fout(fileName, std::ios::out);
-	for (int i = 0; i < N; i++)
+	for (int i = 0; i < n; i++)
 	{
 		fout << (rand() % (2 * M) + 1) - M << "\n";
 	}
@@ -61,12 +67,12 @@ std::fstream CreateFileСycle(std::string fileName, int N, int M)
 	return fout;
 }
 
-std::fstream CreateFileGenerate(std::string fileName, int N, int M)
+std::fstream CreateFileGenerate(std::string fileName, int n, int M)
 {	
-	std::vector<int> ad(N);
+	std::vector<int> ad(n);
 	std::fstream fout(fileName, std::ios::out);
 	std::generate(ad.begin(),ad.end(), rand);
-	for (int i = 0; i < N; i++)
+	for (int i = 0; i < n; i++)
 	{
 		fout << (ad[i] % (2 * M) + 1) - M << "\n";
 	}
@@ -74,134 +80,117 @@ std::fstream CreateFileGenerate(std::string fileName, int N, int M)
 	return fout;
 }
 
-std::list<int> GetList(std::string fileName)
+std::list<double> Getlist(std::string fileName)
 {	
-	std::list<int> List;
+	std::list<double> list;
 	int number;
 	std::fstream fin(fileName, std::ios::in);
 	while (fin)
 	{
 		fin >> number;
-		List.push_back(number);
+		list.push_back(number);
 	}
 	fin.close();
-	List.pop_back();
-	return List;
+	list.pop_back();
+	return list;
 }
 
-/*std::list<int> GetList(std::fstream &fin)
+void OutputResultConsole(std::list<double> list)//std::string fileName = "")
+{	
+	for each (double number in list)
+	{
+		std::cout << number << "\n";
+	}
+}
+
+void OutputResultFile(std::list<double> list, std::string fileName)
 {
-	std::list<int> List;
-	int number;
-	while (fin)
+	std::fstream fout(fileName, std::ios::out);
+	for each (double number in list)
 	{
-		fin >> number;
-		List.push_back(number);
+		fout << number << "\n";
 	}
-	fin.close();
-	List.pop_back();
-	return List;
-}*/
-
-void OutputResult(std::list<int> List, bool onConsole, std::string fileName = "")
-{	
-	if (onConsole)
-	{
-		for each (int number in List)
-		{
-			std::cout << number << "\n";
-		}
-	}
-	else
-	{
-		std::fstream fout(fileName, std::ios::out);
-		for each (int number in List)
-		{
-			fout << number << "\n";
-		}
-		fout.close();
-	}
+	fout.close();
 }
 
-std::list<int> Modify(std::list<int> List, int k)
+std::list<double> Modify(std::list<double> list, int k)
 {	
-	int neg = 1;
-	int kNum = kAndNeg(k, neg, List);
-	kNum = (kNum + neg) / 2;
-	if (kNum != 0)
+	int neg = Findneg(list);
+	double knum = FindK(list,k);
+	double numToDel = (knum + neg) / 2;
+	if (numToDel != 0)
 	{	
-		std::list<int>::iterator it = List.begin();
-		for(;it != List.end();it++)
+		for(std::list<double>::iterator it = list.begin();it != list.end();it++)
 		{
-			*it /= kNum;
+			*it /= numToDel;
 		}
-		return List;
+		return list;
 	}
 	else { throw "Деление на 0"; }
-	return List;
+	return list;
 }
 
-std::list<int> Modify(std::list<int> List, int k, std::list<int>::iterator begin, std::list<int>::iterator end)
+std::list<double> Modify(std::list<double> list, int k, std::list<double>::iterator begin, std::list<double>::iterator end)
 {
-	/*std::list<int> list;
-	for (auto it = begin; it != end; it++)
+	std::list<double> newlist;
+	int neg = Findneg(list);
+	double knum = FindK(list, k);
+	double numToDel = (knum + neg) / 2;
+	if (numToDel != 0)
 	{
-		list.push_back(*it);
-	}
-	list = modify(list);
-	return list;*/
-	std::list<int> newList;
-	int neg = 1;
-	int kNum = kAndNeg(k, neg, List);
-	kNum = (kNum + neg) / 2;
-	if (kNum != 0)
-	{
-		std::list<int>::iterator it = begin;
-		for (; it != end; it++)
+		for (std::list<double>::iterator it = begin; it != end; it++)
 		{
-			newList.push_back(*it / kNum);
+			newlist.push_back(*it / numToDel);
 		}
-		return newList;
+		return newlist;
 	}
 	else { throw "Деление на 0"; }
-	return newList;
+	return newlist;
 }
 
-std::list<int> ModifyTransform(std::list<int> List, int k)
+std::list<double> ModifyTransform(std::list<double> list, int k)
 {
-	std::list<int> newList;
-	newList.resize(List.size());
-	int neg = 1;
-	int kNum = kAndNeg(k, neg, List);
-	kNum = (kNum + neg) / 2;
-	std::transform(List.begin(), List.end(), newList.begin(), [kNum](int num) -> int {return num / kNum;});
-	return newList;
+	std::list<double> newlist;
+	newlist.resize(list.size());
+	int neg = Findneg(list);
+	double knum = FindK(list, k);
+	double numToDel = (knum + neg) / 2;
+	if (numToDel != 0)
+	{
+		std::transform(list.begin(), list.end(), newlist.begin(), [numToDel](int num) -> int {return num / numToDel; });
+	}
+	else { throw "Деление на 0"; }
+	return newlist;
 }
 
-std::list<int> ModifyForEach(std::list<int> List, int k)
+std::list<double> ModifyForEach(std::list<double> list, int k)
 {
-	std::list<int> newList;
-	newList.resize(List.size());
-	int neg = 1;
-	int kNum = kAndNeg(k, neg, List);
-	kNum = (kNum + neg) / 2;
-	std::for_each(List.begin(), List.end(), [kNum](int &num) -> void { num /= kNum; });
-	return List;
+	std::list<double> newlist;
+	newlist.resize(list.size());
+	int neg = Findneg(list);
+	double knum = FindK(list, k);
+	double numToDel = (knum + neg) / 2;
+	if (numToDel != 0)
+	{
+	std::for_each(list.begin(), list.end(), [numToDel](int &num) -> void { num /= numToDel; });
+	}
+	else { throw "Деление на 0"; }
+	return list;
 }
 
-int ListSum(std::list<int> List)
+double listSum(std::list<double> list)
 {
 	int sum = 0;
-	for (int x : List)
+	for (int x : list)
 	{
 		sum += x;
 	}
 	return sum;
 }
 
-double ListAverage(std::list<int> List)
+double listAverage(std::list<double> list)
 {
-	return ListSum(List) / List.size();
+	return listSum(list) / list.size();
 }
 
 int ShowMenu()
@@ -216,8 +205,9 @@ int ShowMenu()
 		std::cout << "5) modify с std::transform;\n";
 		std::cout << "6) modify c std::for_each;\n";
 		std::cout << "7) сумма и среднее арифметическое;\n";
-		std::cout << "8) вывести список;\n";
-		std::cout << "9) выход;\n";
+		std::cout << "8) вывести список в консоль;\n";
+		std::cout << "9) вывести список в файл;\n";
+		std::cout << "10) выход;\n";
 		std::cin >> res;
 	}
 	return res;
@@ -228,9 +218,9 @@ int main()
 	setlocale(LC_ALL, "rus");
 	bool exite = false;
 	int option = ShowMenu();
-	std::list<int> List;
+	std::list<double> list;
 	std::fstream file;
-	std::string filename;
+	std::string fileName;
 	int k,o;
 
 	while (!exite)
@@ -239,21 +229,21 @@ int main()
 		{
 		case 1:
 			std::cout << "Введите имя файла\n";
-			std::cin >> filename;
-			file.open(filename);
+			std::cin >> fileName;
+			file.open(fileName);
 			/*while (!file.is_open())
 			{
 				std::cout << "некорректное имя, повторите ввод\n";
-				std::cin >> filename;
-				file.open(filename);
+				std::cin >> fileName;
+				file.open(fileName);
 			}*/
 			option = ShowMenu();
 			break;
 		case 2:
-			int N, M;
+			int n, M;
 			o = 0;
-			std::cout << "Введите N\n";
-			std::cin >> N;
+			std::cout << "Введите n\n";
+			std::cin >> n;
 			std::cout << "Введите M\n";
 			std::cin >> M;
 			while ((o < 1) || (o > 3))
@@ -266,54 +256,52 @@ int main()
 			switch (o)
 			{
 			case 1:
-				file = CreateFileСycle(filename, N, M);
+				file = CreateFileСycle(fileName, n, M);
 				break;
 			case 2:
-				file = CreateFileGenerate(filename, N, M);
+				file = CreateFileGenerate(fileName, n, M);
 				break;
 			case 3:
 				break;
 			}
-			List= GetList(filename);
+			list= Getlist(fileName);
 			option = ShowMenu();
 			break;
 		case 3:
 			std::cin >> k;
-			List = Modify(List, k);
+			list = Modify(list, k);
 			option = ShowMenu();
 			break;
 		case 4:
 			std::cin >> k;
-			List = Modify(List, k, List.begin(),List.end());
+			list = Modify(list, k, list.begin(),list.end());
 			option = ShowMenu();
 			break;
 		case 5:
 			std::cin >> k;
-			List = ModifyTransform(List, k);
+			list = ModifyTransform(list, k);
 			option = ShowMenu();
 			break;
 		case 6:
 			std::cin >> k;
-			List = ModifyForEach(List, k);
+			list = ModifyForEach(list, k);
 			option = ShowMenu();
 			break;
 		case 7:
-			std::cout << "Сумма = " << ListSum << "\n";
-			std::cout << "Среднеее арифмитическое = " << ListAverage << "\n";
+			std::cout << "Сумма = " << listSum << "\n";
+			std::cout << "Среднеее арифмитическое = " << listAverage << "\n";
 			break;
 		case 8:
-			std::cout << "1) консоль\n2) в файл\n";
-			std::cin >> o;
-			switch (o)
-			{
-			case 1: OutputResult(List, true);
-				break;
-			case 2: OutputResult(List, false, filename);
-				break;
-			}
+			OutputResultConsole(list);
 			option = ShowMenu();
 			break;
 		case 9:
+			std::cout << "Введите имя файла\n";
+			std::cin >> fileName;
+			OutputResultFile(list, fileName);
+			option = ShowMenu();
+			break;
+		case 10:
 			exite = true;
 			break;
 		}
