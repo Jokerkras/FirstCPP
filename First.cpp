@@ -14,7 +14,7 @@ C) список (std::list)
 #include <algorithm> 
 #include <time.h>
 #include <vector>
-
+//Найти первое отрицательное
 double Findneg(std::list<double> list)
 {
 	if (list.empty())
@@ -34,52 +34,56 @@ double Findneg(std::list<double> list)
 		return neg;
 	}
 }
-
+//Найти элемент с номером К
 double FindK(std::list<double> list,int k)
 {
 	if (list.empty())
 	{
 		throw "Список пуст";
 	}
-	else
+	if ((k >= 1)&&(k <= (list.size())))
 	{
-		int knum;
-		if (k <= (list.size()-1))
-		{
-			std::list<double>::iterator it = list.begin();
-			for(int i = 0; i < k; i++) 
-				it++;
-			return *it;
-		}
-		else { throw "В списке меньше, чем k элементов"; }
+		std::list<double>::iterator it = list.begin();
+		for(int i = 0; i < k; i++) 
+			it++;
+		return *it;
 	}
+	else { throw "В списке меньше, чем k элементов"; }
 }
-
+//Создание списка циклом
 std::fstream CreateFileСycle(std::string fileName, int n, int M)
 {	
-	srand(time(NULL));
-	std::fstream fout(fileName, std::ios::out);
-	for (int i = 0; i < n; i++)
+	if ((M > 0)||( n > 0))
 	{
-		fout << (rand() % (2 * M) + 1) - M << "\n";
+		srand(time(NULL));
+		std::fstream fout(fileName, std::ios::out);
+		for (int i = 0; i < n; i++)
+		{
+			fout << (rand() % (2 * M) + 1) - M << "\n";
+		}
+		fout.close();
+		return fout;
 	}
-	fout.close();
-	return fout;
+	else { throw "Значения не должны быть отрицательными"; }
 }
-
+//Создание списка алгаритмом generate
 std::fstream CreateFileGenerate(std::string fileName, int n, int M)
 {	
-	std::vector<int> ad(n);
-	std::fstream fout(fileName, std::ios::out);
-	std::generate(ad.begin(),ad.end(), rand);
-	for (int i = 0; i < n; i++)
+	if ((M > 0) || (n > 0))
 	{
-		fout << (ad[i] % (2 * M) + 1) - M << "\n";
+		std::vector<int> ad(n);
+		std::fstream fout(fileName, std::ios::out);
+		std::generate(ad.begin(),ad.end(), rand);
+		for (int i = 0; i < n; i++)
+		{
+			fout << (ad[i] % (2 * M) + 1) - M << "\n";
+		}
+		fout.close();
+		return fout;
 	}
-	fout.close();
-	return fout;
+	else { throw "Значения не должны быть отрицательными"; }
 }
-
+// Считывание списка из файла
 std::list<double> Getlist(std::string fileName)
 {	
 	std::list<double> list;
@@ -94,15 +98,21 @@ std::list<double> Getlist(std::string fileName)
 	list.pop_back();
 	return list;
 }
-
+//Вывод в консоль
 void OutputResultConsole(std::list<double> list)//std::string fileName = "")
-{	
-	for each (double number in list)
+{
+	std::cout << "__________________________\n";
+	if (list.empty()) std::cout << "Списрк пуст\n";
+	else
 	{
-		std::cout << number << "\n";
+		for each (double number in list)
+		{
+			std::cout << number << "\n";
+		}
 	}
+	std::cout << "__________________________\n";
 }
-
+//Вывод в файл
 void OutputResultFile(std::list<double> list, std::string fileName)
 {
 	std::fstream fout(fileName, std::ios::out);
@@ -112,7 +122,7 @@ void OutputResultFile(std::list<double> list, std::string fileName)
 	}
 	fout.close();
 }
-
+// Изменение мой способ
 std::list<double> Modify(std::list<double> list, int k)
 {	
 	int neg = Findneg(list);
@@ -129,12 +139,12 @@ std::list<double> Modify(std::list<double> list, int k)
 	else { throw "Деление на 0"; }
 	return list;
 }
-
+// Изменение через итераторы
 std::list<double> Modify(std::list<double> list, int k, std::list<double>::iterator begin, std::list<double>::iterator end)
 {
 	std::list<double> newlist;
 	int neg = Findneg(list);
-	double knum = FindK(list, k);
+	double knum = FindK(list, k); // Проверка k на пригодность проходит здесь, надо ли дублировать?
 	double numToDel = (knum + neg) / 2;
 	if (numToDel != 0)
 	{
@@ -147,7 +157,7 @@ std::list<double> Modify(std::list<double> list, int k, std::list<double>::itera
 	else { throw "Деление на 0"; }
 	return newlist;
 }
-
+// Изменение через transform
 std::list<double> ModifyTransform(std::list<double> list, int k)
 {
 	std::list<double> newlist;
@@ -162,22 +172,22 @@ std::list<double> ModifyTransform(std::list<double> list, int k)
 	else { throw "Деление на 0"; }
 	return newlist;
 }
-
+//Изменение через for_each
 std::list<double> ModifyForEach(std::list<double> list, int k)
 {
 	std::list<double> newlist;
 	newlist.resize(list.size());
-	int neg = Findneg(list);
+	double neg = Findneg(list);
 	double knum = FindK(list, k);
 	double numToDel = (knum + neg) / 2;
 	if (numToDel != 0)
 	{
-	std::for_each(list.begin(), list.end(), [numToDel](int &num) -> void { num /= numToDel; });
+	std::for_each(list.begin(), list.end(), [numToDel](double &num) -> void { num /= numToDel; });
 	}
 	else { throw "Деление на 0"; }
 	return list;
 }
-
+// Сумма по списку
 double listSum(std::list<double> list)
 {
 	int sum = 0;
@@ -187,16 +197,16 @@ double listSum(std::list<double> list)
 	}
 	return sum;
 }
-
+// Среднее значение
 double listAverage(std::list<double> list)
 {
 	return listSum(list) / list.size();
 }
-
+// Показать меню
 int ShowMenu()
 {
 	int res = 0;
-	while ((res < 1)||(res > 9))
+	while ((res < 1)||(res > 10))
 	{
 		std::cout << "1) выберите файл;\n";
 		std::cout << "2) создать файл/список;\n";
@@ -253,6 +263,7 @@ int main()
 				std::cout << "3) Отмена\n";
 				std::cin >> o;
 			}
+			fileName = "Что-то что никто не наберет.txt";
 			switch (o)
 			{
 			case 1:
@@ -268,23 +279,31 @@ int main()
 			option = ShowMenu();
 			break;
 		case 3:
+			std::cout << "Введите номер К\n";
 			std::cin >> k;
 			list = Modify(list, k);
+			OutputResultConsole(list);
 			option = ShowMenu();
 			break;
 		case 4:
+			std::cout << "Введите номер К\n";
 			std::cin >> k;
 			list = Modify(list, k, list.begin(),list.end());
+			OutputResultConsole(list);
 			option = ShowMenu();
 			break;
 		case 5:
+			std::cout << "Введите номер К\n";
 			std::cin >> k;
 			list = ModifyTransform(list, k);
+			OutputResultConsole(list);
 			option = ShowMenu();
 			break;
 		case 6:
+			std::cout << "Введите номер К\n";
 			std::cin >> k;
 			list = ModifyForEach(list, k);
+			OutputResultConsole(list);
 			option = ShowMenu();
 			break;
 		case 7:
