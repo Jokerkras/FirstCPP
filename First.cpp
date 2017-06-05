@@ -8,17 +8,14 @@ C) список (std::list)
 
 #include "stdafx.h"
 #include <list>
-#include <random>
+#include <clocale>
+#include <cstdlib>
 #include <iostream>
 #include <fstream>
 #include <string>
 #include <algorithm> 
 #include <time.h>
 #include <vector>
-//!!!!!!!!!!!!!
-// Вставить проверку на пустоту списка в подходящее место
-//!!!!!!!!!!!!!
-//Найти первое отрицательное
 
 int InputK(int begin, int end)
 {	
@@ -44,10 +41,8 @@ double Findneg(std::list<double>::iterator begin, std::list<double>::iterator en
 //Найти элемент с номером К
 double FindK(std::list<double>::iterator begin, std::list<double>::iterator end,int k)
 {
-
 	std::list<double>::iterator it = begin;
-	for(int i = 1; i < k, it!=end ; i++) 
-		it++;
+	for(int i = 1; i < k, it!=end ; i++,it++)
 	return *it;
 }
 //Создание списка циклом
@@ -55,7 +50,6 @@ std::fstream CreateFileСycle(std::string fileName, int n, int M)
 {	
 	if ((M > 0)&&( n > 0))
 	{
-		srand(time(NULL));
 		std::fstream fout(fileName, std::ios::out);
 		for (int i = 0; i < n; i++)
 		{
@@ -123,7 +117,8 @@ void OutputResultFile(std::list<double> list, std::string fileName)
 }
 // Изменение мой способ
 std::list<double> Modify(std::list<double> list, int k)
-{	
+{
+	if (list.empty()) throw ("Список пуст операцию произвести не возможно\n");
 	double knum = FindK(list.begin(), list.end(), k);
 	double neg = Findneg(list.begin(), list.end());
 	double numToDel = (knum + neg) / 2;
@@ -157,6 +152,7 @@ void Modify(std::list<double>::iterator begin, std::list<double>::iterator end,i
 // Изменение через transform
 std::list<double> ModifyTransform(std::list<double> list,int k)
 {
+	if (list.empty()) throw ("Список пуст операцию произвести не возможно\n");
 	double knum = FindK(list.begin(), list.end(), k);
 	std::list<double> newlist;
 	newlist.resize(list.size());
@@ -172,6 +168,7 @@ std::list<double> ModifyTransform(std::list<double> list,int k)
 //Изменение через for_each
 std::list<double> ModifyForEach(std::list<double> list,int k)
 {
+	if (list.empty()) throw ("Список пуст операцию произвести не возможно\n");
 	double knum = FindK(list.begin(), list.end(), k);
 	std::list<double> newlist;
 	newlist.resize(list.size());
@@ -187,6 +184,7 @@ std::list<double> ModifyForEach(std::list<double> list,int k)
 // Сумма по списку
 double listSum(std::list<double> list)
 {
+	if (list.empty()) throw ("Список пуст операцию произвести не возможно\n");
 	double sum = 0;
 	std::for_each(list.begin(), list.end(), [&sum](double num) -> void { sum+=num; });
 	return sum;
@@ -199,6 +197,7 @@ double listAverage(std::list<double> list)
 // Показать меню
 int ShowMenu()
 {
+	std::string str;
 	int res = 0;
 	while ((res < 1)||(res > 10))
 	{
@@ -215,6 +214,7 @@ int ShowMenu()
 		std::cout << "10) выход;\n";
 		std::cout << "__________________________\n";
 		std::cin >> res;
+		std::getline(std::cin, str);
 	}
 	return res;
 }
@@ -222,6 +222,7 @@ int ShowMenu()
 int main()
 {	
 	setlocale(LC_ALL, "rus");
+	srand(time(NULL));
 	std::string str;
 	bool exite = false;
 	int option = ShowMenu();
@@ -280,6 +281,8 @@ int main()
 					break;
 				case 3:
 					break;
+				default:
+					throw ("Неопределенный ввод");
 				}
 				list = Getlist(fileName);
 				option = ShowMenu();
@@ -307,12 +310,13 @@ int main()
 			try {
 				int a, b, o;
 				a = b = o = 0;
+				if (list.empty()) throw ("Список пуст операцию произвести не возможно\n");
 				if (!list.empty()) {
 					OutputResultConsole(list);
 					while ((o < 1) || (o > 3))
 					{
 						std::cout << " 1)[list.begin(), list.end())\n";
-						std::cout << " 2)[a, b)\n";
+						std::cout << " 2)[a, b]\n";
 						std::cout << " 3)Отмена\n";
 						std::cout << " >> ";
 						std::cin >> o;
@@ -330,13 +334,12 @@ int main()
 						std::cin >> a;
 						std::cout << "b: ";
 						std::cin >> b;
-						std::getline(std::cin, str);
-						while (a < 0 || a > list.size())
+						while (a < 1 || a > list.size())
 						{
 							std::cout << "Повторите ввод a: ";
 							std::cin >> a;
 						}
-						while (b < 0 || b > list.size())
+						while (b < 1 || b > list.size())
 						{
 							std::cout << "Повторите ввод b: ";
 							std::cin >> b;
@@ -350,7 +353,7 @@ int main()
 						}
 						begin = list.begin();
 						end = list.begin();
-						std::advance(begin, a);
+						std::advance(begin, a-1);
 						std::advance(end, b);
 						k = InputK(a, b);
 						Modify(begin, end, k);
@@ -358,6 +361,8 @@ int main()
 						break;
 					case 3:
 						break;
+					default:
+						throw ("Неопределенный ввод");
 					}
 				
 				}
@@ -414,6 +419,8 @@ int main()
 		case 10:
 			exite = true;
 			break;
+		default:
+			option = ShowMenu();
 		}
 	}
     return 0;
